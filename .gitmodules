@@ -1,0 +1,3 @@
+[submodule "nanobot"]
+	path = nanobot
+	url = git@github.com:ccpeanutliu/nanobot.git

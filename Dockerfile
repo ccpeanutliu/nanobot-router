@@ -3,6 +3,8 @@ FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim AS builder
 WORKDIR /app
 
 COPY pyproject.toml uv.lock .
+# nanobot submodule must be present for uv to resolve the local path dep
+COPY nanobot/ ./nanobot/
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev --no-install-project
 

@@ -1386,8 +1386,8 @@ wheels = [
 
 [[package]]
 name = "nanobot-ai"
-version = "0.1.5.post2"
-source = { registry = "https://pypi.org/simple" }
+version = "0.1.5.post1"
+source = { directory = "nanobot" }
 dependencies = [
     { name = "anthropic" },
     { name = "chardet" },
@@ -1428,15 +1428,72 @@ dependencies = [
     { name = "websocket-client" },
     { name = "websockets" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/bd/2e/247922784187ab2bbbd0ba493f68d3ae5ac90e649e0c3fc304e29bd69e38/nanobot_ai-0.1.5.post2.tar.gz", hash = "sha256:558b7e49130dcf95646009ac807eaa5f196489a95bbf72655a82402908923e1a", size = 346018, upload-time = "2026-04-21T17:43:42.017Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/ae/16/19367cc0866d7b87962d6cec0dd52fdaeb909770a4837f05f89ae383b368/nanobot_ai-0.1.5.post2-py3-none-any.whl", hash = "sha256:8d14b0c4029fbed18e8a18af5228819ab17ed0a5bb0d5864ca2185589853ff05", size = 402261, upload-time = "2026-04-21T17:43:40.19Z" },
-]
 
 [package.optional-dependencies]
 api = [
     { name = "aiohttp" },
 ]
+
+[package.metadata]
+requires-dist = [
+    { name = "aiohttp", marker = "extra == 'api'", specifier = ">=3.9.0,<4.0.0" },
+    { name = "aiohttp", marker = "extra == 'dev'", specifier = ">=3.9.0,<4.0.0" },
+    { name = "anthropic", specifier = ">=0.45.0,<1.0.0" },
+    { name = "chardet", specifier = ">=3.0.2,<6.0.0" },
+    { name = "croniter", specifier = ">=6.0.0,<7.0.0" },
+    { name = "cryptography", marker = "extra == 'msteams'", specifier = ">=41.0" },
+    { name = "ddgs", specifier = ">=9.5.5,<10.0.0" },
+    { name = "dingtalk-stream", specifier = ">=0.24.0,<1.0.0" },
+    { name = "discord-py", marker = "extra == 'discord'", specifier = ">=2.5.2,<3.0.0" },
+    { name = "dulwich", specifier = ">=0.22.0,<1.0.0" },
+    { name = "filelock", specifier = ">=3.25.2" },
+    { name = "httpx", specifier = ">=0.28.0,<1.0.0" },
+    { name = "jinja2", specifier = ">=3.1.0,<4.0.0" },
+    { name = "json-repair", specifier = ">=0.57.0,<1.0.0" },
+    { name = "langsmith", marker = "extra == 'langsmith'", specifier = ">=0.1.0" },
+    { name = "lark-oapi", specifier = ">=1.5.0,<2.0.0" },
+    { name = "loguru", specifier = ">=0.7.3,<1.0.0" },
+    { name = "matrix-nio", extras = ["e2e"], marker = "sys_platform != 'win32' and extra == 'matrix'", specifier = ">=0.25.2" },
+    { name = "mcp", specifier = ">=1.26.0,<2.0.0" },
+    { name = "mistune", marker = "extra == 'matrix'", specifier = ">=3.0.0,<4.0.0" },
+    { name = "msgpack", specifier = ">=1.1.0,<2.0.0" },
+    { name = "nh3", marker = "extra == 'matrix'", specifier = ">=0.2.17,<1.0.0" },
+    { name = "oauth-cli-kit", specifier = ">=0.1.3,<1.0.0" },
+    { name = "openai", specifier = ">=2.8.0" },
+    { name = "openpyxl", specifier = ">=3.1.0,<4.0.0" },
+    { name = "prompt-toolkit", specifier = ">=3.0.50,<4.0.0" },
+    { name = "pycryptodome", marker = "extra == 'weixin'", specifier = ">=3.20.0" },
+    { name = "pydantic", specifier = ">=2.12.0,<3.0.0" },
+    { name = "pydantic-settings", specifier = ">=2.12.0,<3.0.0" },
+    { name = "pyjwt", marker = "extra == 'msteams'", specifier = ">=2.0,<3.0" },
+    { name = "pymupdf", marker = "extra == 'dev'", specifier = ">=1.25.0" },
+    { name = "pymupdf", marker = "extra == 'pdf'", specifier = ">=1.25.0" },
+    { name = "pypdf", specifier = ">=5.0.0,<6.0.0" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=9.0.0,<10.0.0" },
+    { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=1.3.0,<2.0.0" },
+    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=6.0.0,<7.0.0" },
+    { name = "python-docx", specifier = ">=1.1.0,<2.0.0" },
+    { name = "python-pptx", specifier = ">=1.0.0,<2.0.0" },
+    { name = "python-socketio", specifier = ">=5.16.0,<6.0.0" },
+    { name = "python-socks", extras = ["asyncio"], marker = "sys_platform != 'win32'", specifier = ">=2.8.0,<3.0.0" },
+    { name = "python-telegram-bot", extras = ["socks"], specifier = ">=22.6,<23.0" },
+    { name = "pyyaml", specifier = ">=6.0,<7.0.0" },
+    { name = "qq-botpy", specifier = ">=1.2.0,<2.0.0" },
+    { name = "qrcode", extras = ["pil"], marker = "extra == 'weixin'", specifier = ">=8.0" },
+    { name = "questionary", specifier = ">=2.0.0,<3.0.0" },
+    { name = "readability-lxml", specifier = ">=0.8.4,<1.0.0" },
+    { name = "rich", specifier = ">=14.0.0,<15.0.0" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.1.0" },
+    { name = "slack-sdk", specifier = ">=3.39.0,<4.0.0" },
+    { name = "slackify-markdown", specifier = ">=0.2.0,<1.0.0" },
+    { name = "socksio", specifier = ">=1.0.0,<2.0.0" },
+    { name = "tiktoken", specifier = ">=0.12.0,<1.0.0" },
+    { name = "typer", specifier = ">=0.20.0,<1.0.0" },
+    { name = "websocket-client", specifier = ">=1.9.0,<2.0.0" },
+    { name = "websockets", specifier = ">=16.0,<17.0" },
+    { name = "wecom-aibot-sdk-python", marker = "extra == 'wecom'", specifier = ">=0.1.5" },
+]
+provides-extras = ["api", "wecom", "weixin", "msteams", "matrix", "discord", "langsmith", "pdf", "dev"]
 
 [[package]]
 name = "nanobot-router"
@@ -1463,7 +1520,7 @@ requires-dist = [
     { name = "fastapi", specifier = ">=0.115" },
     { name = "httpx", specifier = ">=0.27" },
     { name = "httpx", marker = "extra == 'dev'" },
-    { name = "nanobot-ai", extras = ["api"] },
+    { name = "nanobot-ai", extras = ["api"], directory = "nanobot" },
     { name = "pydantic-settings", specifier = ">=2.0" },
     { name = "pyjwt", extras = ["crypto"], specifier = ">=2.8" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
