@@ -1,0 +1,131 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nanobot-router
+  namespace: nanobot
+  labels:
+    app: nanobot-router
+spec:
+  # IMPORTANT: keep replicas=1 unless you add an external state store
+  # (the ProcessManager in-process state is not shared across pods).
+  # For HA, use Redis-backed instance tracking (future work).
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nanobot-router
+  template:
+    metadata:
+      labels:
+        app: nanobot-router
+    spec:
+      # Each user's nanobot process needs its own port range;
+      # running as a single pod keeps port allocation simple.
+      # Resource budget: ~50Mi per idle nanobot + ~200Mi base router.
+      # For 200 max users: allow 10-20 concurrent → ~1-2Gi RAM peak.
+      containers:
+        - name: router
+          image: your-registry/nanobot-router:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+              name: http
+
+          env:
+            # Auth
+            - name: ROUTER_AUTH_MODE
+              value: "jwt"
+            - name: ROUTER_JWT_JWKS_URL
+              value: "https://your-sso.example.com/.well-known/jwks.json"
+            - name: ROUTER_JWT_AUDIENCE
+              value: "nanobot"
+            - name: ROUTER_JWT_USER_ID_CLAIM
+              value: "sub"
+
+            # Process lifecycle
+            - name: ROUTER_IDLE_TIMEOUT_SECONDS
+              value: "300"
+            - name: ROUTER_PORT_RANGE_START
+              value: "9000"
+            - name: ROUTER_PORT_RANGE_END
+              value: "9200"
+            - name: ROUTER_STARTUP_TIMEOUT_SECONDS
+              value: "30"
+
+            # Paths
+            - name: ROUTER_WORKSPACE_BASE
+              value: "/data/workspaces"
+            - name: ROUTER_NANOBOT_CONFIG_PATH
+              value: "/config/nanobot.json"
+
+          volumeMounts:
+            - name: workspaces
+              mountPath: /data/workspaces
+            - name: nanobot-config
+              mountPath: /config
+              readOnly: true
+
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "4"
+              memory: "4Gi"
+
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 15
+
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 10
+
+      volumes:
+        - name: workspaces
+          persistentVolumeClaim:
+            claimName: nanobot-workspaces
+        - name: nanobot-config
+          secret:
+            secretName: nanobot-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nanobot-router
+  namespace: nanobot
+spec:
+  selector:
+    app: nanobot-router
+  ports:
+    - port: 80
+      targetPort: 8080
+      name: http
+  type: ClusterIP
+---
+# Expose via Ingress (adjust to your ingress class / annotations)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nanobot-router
+  namespace: nanobot
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "120"
+spec:
+  rules:
+    - host: nanobot.your-domain.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: nanobot-router
+                port:
+                  name: http

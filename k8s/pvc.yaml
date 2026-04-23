@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nanobot-workspaces
+  namespace: nanobot
+spec:
+  accessModes:
+    - ReadWriteMany     # NFS / CephFS / Azure Files / EFS
+  storageClassName: nfs  # change to your storage class
+  resources:
+    requests:
+      storage: 50Gi
+---
+# Shared nanobot config (providers, model, etc.)
+# Contains your ~/.nanobot/config.json equivalent
+apiVersion: v1
+kind: Secret
+metadata:
+  name: nanobot-config
+  namespace: nanobot
+type: Opaque
+stringData:
+  nanobot.json: |
+    {
+      "agents": {
+        "defaults": {
+          "model": "anthropic/claude-opus-4-5",
+          "maxTokens": 8192,
+          "contextWindowTokens": 65536,
+          "maxToolIterations": 200
+        }
+      },
+      "providers": {
+        "anthropic": {
+          "apiKey": "YOUR_API_KEY_HERE"
+        }
+      }
+    }
