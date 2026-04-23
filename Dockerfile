@@ -2,23 +2,21 @@ FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim AS builder
 
 WORKDIR /app
 
-# Install nanobot + router deps together so uv resolves a single venv
-COPY pyproject.toml .
+COPY pyproject.toml uv.lock .
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv pip install --system nanobot-ai[api] && \
-    uv pip install --system .
+    uv sync --frozen --no-dev
 
 # ---- Runtime image ----
 FROM python:3.12-slim-bookworm
 
 WORKDIR /app
 
-# Copy installed packages from builder
-COPY --from=builder /usr/local/lib/python3.12 /usr/local/lib/python3.12
-COPY --from=builder /usr/local/bin/nanobot    /usr/local/bin/nanobot
-COPY --from=builder /usr/local/bin/uvicorn    /usr/local/bin/uvicorn
+# Copy the virtualenv from builder (contains nanobot + router deps)
+COPY --from=builder /app/.venv /app/.venv
 
 COPY router/ ./router/
+
+ENV PATH="/app/.venv/bin:$PATH"
 
 # Workspace volume — mount a PVC here in k8s (ReadWriteMany)
 VOLUME ["/data/workspaces"]
