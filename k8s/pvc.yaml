@@ -32,7 +32,9 @@ stringData:
       },
       "providers": {
         "vllm": {
-          "apiBase": "http://litellm.peanutliu.cc"
+          "apiBase": "http://litellm.peanutliu.cc",
+          "apiKey": "mock-key",
+          "extraHeaders": null
         }
       }
     }
