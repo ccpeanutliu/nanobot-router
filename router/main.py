@@ -96,9 +96,12 @@ async def _proxy(user_id: str, request: Request) -> Response:
     if is_stream:
         async def _stream_generator():
             try:
+                # Remove Accept-Encoding so nanobot doesn't gzip the SSE stream.
+                # Compression buffers chunks and breaks incremental delivery.
+                stream_headers = {k: v for k, v in headers.items() if k.lower() != "accept-encoding"}
                 async with httpx.AsyncClient(timeout=settings.proxy_timeout_seconds) as client:
                     async with client.stream(
-                        request.method, target_url, headers=headers, content=body,
+                        request.method, target_url, headers=stream_headers, content=body,
                     ) as upstream:
                         async for chunk in upstream.aiter_bytes():
                             yield chunk
