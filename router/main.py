@@ -84,6 +84,35 @@ async def _proxy(user_id: str, request: Request) -> Response:
     headers = _forward_headers(request)
     body = await request.body()
 
+    # Detect SSE streaming request
+    is_stream = False
+    if request.method == "POST" and body:
+        try:
+            import json
+            is_stream = json.loads(body).get("stream", False)
+        except Exception:
+            pass
+
+    if is_stream:
+        async def _stream_generator():
+            try:
+                async with httpx.AsyncClient(timeout=settings.proxy_timeout_seconds) as client:
+                    async with client.stream(
+                        request.method, target_url, headers=headers, content=body,
+                    ) as upstream:
+                        async for chunk in upstream.aiter_bytes():
+                            yield chunk
+            except httpx.ConnectError:
+                await process_manager.stop(user_id)
+            finally:
+                process_manager.touch(user_id)
+
+        return StreamingResponse(
+            _stream_generator(),
+            media_type="text/event-stream",
+            headers={"Cache-Control": "no-cache", "Connection": "keep-alive"},
+        )
+
     try:
         async with httpx.AsyncClient(timeout=settings.proxy_timeout_seconds) as client:
             upstream = await client.request(
@@ -93,7 +122,6 @@ async def _proxy(user_id: str, request: Request) -> Response:
                 content=body,
             )
     except httpx.ConnectError:
-        # Process may have died between get_or_start and the request
         await process_manager.stop(user_id)
         return Response(content="nanobot instance unavailable, please retry", status_code=503)
     except httpx.TimeoutException:
@@ -101,7 +129,6 @@ async def _proxy(user_id: str, request: Request) -> Response:
 
     process_manager.touch(user_id)
 
-    # Stream back the response (handles SSE correctly)
     response_headers = {
         k: v
         for k, v in upstream.headers.items()
