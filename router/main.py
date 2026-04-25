@@ -195,6 +195,7 @@ async def proxy_stream(request: Request):
 
     target_url = f"{inst.base_url}/v1/chat/completions"
     headers = _forward_headers(request)
+    headers["accept-encoding"] = "identity"
     body = await request.body()
 
     async def _stream():
