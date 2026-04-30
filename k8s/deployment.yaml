@@ -56,6 +56,8 @@ spec:
               value: "/data/workspaces"
             - name: ROUTER_NANOBOT_CONFIG_PATH
               value: "/config/nanobot.json"
+            - name: ROUTER_WORKSPACE_TEMPLATES_DIR
+              value: "/config/templates"
 
           volumeMounts:
             - name: workspaces

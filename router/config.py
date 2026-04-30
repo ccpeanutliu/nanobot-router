@@ -41,6 +41,11 @@ class Settings(BaseSettings):
     # Header to read the raw SSO token from
     auth_header: str = "Authorization"   # Bearer <token>
 
+    # --- Workspace templates ---
+    # Directory containing shared AGENTS.md / SOUL.md / TOOLS.md.
+    # Files are copied into each user's workspace on first start (skipped if already present).
+    workspace_templates_dir: str = ""     # empty = disabled
+
     # --- Proxy ---
     proxy_timeout_seconds: float = 120.0  # forwarded to nanobot as well
 

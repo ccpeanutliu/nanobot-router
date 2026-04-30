@@ -10,6 +10,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import os
+import shutil
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -146,6 +147,7 @@ class ProcessManager:
         port = await self._allocate_port()
         workspace = Path(settings.workspace_base) / user_id
         workspace.mkdir(parents=True, exist_ok=True)
+        self._copy_templates(workspace)
 
         cmd = [
             settings.nanobot_bin,
@@ -182,6 +184,22 @@ class ProcessManager:
 
         logger.info("nanobot ready for user=%s pid=%d port=%d", user_id, process.pid, port)
         return inst
+
+    @staticmethod
+    def _copy_templates(workspace: Path) -> None:
+        """Copy shared template files into workspace if not already present."""
+        if not settings.workspace_templates_dir:
+            return
+        templates = Path(settings.workspace_templates_dir)
+        if not templates.is_dir():
+            logger.warning("workspace_templates_dir %s not found, skipping", templates)
+            return
+        for src in templates.iterdir():
+            if src.is_file():
+                dst = workspace / src.name
+                if not dst.exists():
+                    shutil.copy2(src, dst)
+                    logger.info("Copied template %s → %s", src.name, workspace)
 
     async def _wait_healthy(self, inst: NanobotInstance) -> None:
         """Poll /health until nanobot is ready or timeout."""
