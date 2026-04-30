@@ -39,9 +39,8 @@ def _validate_jwt(token: str) -> str:
     """Validate JWT and return user_id claim. Raises HTTPException on failure."""
     import jwt  # PyJWT
 
-    options: dict = {}
-    if settings.jwt_audience:
-        options["audience"] = settings.jwt_audience
+    options: dict = {} if settings.jwt_audience else {"verify_aud": False}
+    audience = settings.jwt_audience or None
 
     try:
         if settings.jwt_jwks_url:
@@ -52,6 +51,7 @@ def _validate_jwt(token: str) -> str:
                 signing_key.key,
                 algorithms=settings.jwt_algorithm_list,
                 options=options,
+                audience=audience,
             )
         elif settings.jwt_secret:
             payload = jwt.decode(
@@ -59,6 +59,7 @@ def _validate_jwt(token: str) -> str:
                 settings.jwt_secret,
                 algorithms=settings.jwt_algorithm_list,
                 options=options,
+                audience=audience,
             )
         else:
             raise HTTPException(status_code=500, detail="JWT auth configured but no secret or JWKS URL set")
@@ -68,6 +69,7 @@ def _validate_jwt(token: str) -> str:
         raise HTTPException(status_code=401, detail=f"Invalid token: {e}")
 
     user_id = payload.get(settings.jwt_user_id_claim)
+    logger.info(f"get user_id: {user_id}. claim: {settings.jwt_user_id_claim}")
     if not user_id:
         raise HTTPException(status_code=401, detail=f"Token missing '{settings.jwt_user_id_claim}' claim")
     return str(user_id)

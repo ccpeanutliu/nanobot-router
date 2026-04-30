@@ -6,12 +6,14 @@ nanobot instance, then proxies the request through.
 
 from __future__ import annotations
 
+import json
 import logging
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 import httpx
 from fastapi import FastAPI, Request, Response
-from fastapi.responses import StreamingResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 
 from .auth import resolve_user_id
 from .config import settings
@@ -168,6 +170,27 @@ async def admin_stop(user_id: str):
     """Manually stop a user's instance (workspace preserved)."""
     await process_manager.stop(user_id)
     return {"stopped": user_id}
+
+
+@app.get("/conversations")
+async def get_conversations(request: Request):
+    """Return saved conversation history for the authenticated user."""
+    user_id = await resolve_user_id(request)
+    path = Path(settings.workspace_base) / user_id / "conversations.json"
+    if not path.exists():
+        return JSONResponse(content=[])
+    return JSONResponse(content=json.loads(path.read_text(encoding="utf-8")))
+
+
+@app.put("/conversations")
+async def put_conversations(request: Request):
+    """Persist conversation history for the authenticated user."""
+    user_id = await resolve_user_id(request)
+    workspace = Path(settings.workspace_base) / user_id
+    workspace.mkdir(parents=True, exist_ok=True)
+    body = await request.body()
+    (workspace / "conversations.json").write_bytes(body)
+    return {"ok": True}
 
 
 # Proxy all nanobot API paths — auth required
